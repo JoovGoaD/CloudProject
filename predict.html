@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ru">
+
+<header>
+    <a href="/" style="display:inline-block;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:#111;color:#fff;text-decoration:none;">
+    Back to dashboard
+  </a>
+</header>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Form</title>
+  <style>
+
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      background:#f2f2f2;
+      padding:30px;
+    }
+    .container{
+      max-width:720px;
+      margin:0 auto;
+      background:#fff;
+      border:1px solid #ddd;
+      border-radius:12px;
+      padding:20px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+    @media (max-width: 700px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    label{
+      display:block;
+      font-size:13px;
+      margin:0 0 6px 0;
+      color:#333;
+    }
+    input, select{
+      width:100%;
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      background:#fff;
+      font-size:14px;
+    }
+    button{
+      margin-top:14px;
+      padding:10px 14px;
+      border:0;
+      border-radius:10px;
+      background:#3b82f6;
+      color:#fff;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    pre{
+      margin-top:14px;
+      padding:12px;
+      background:#f7f7f7;
+      border:1px solid #ddd;
+      border-radius:10px;
+      overflow:auto;
+      font-size:12px;
+    }
+    
+    .result{
+  text-align:center;
+  font-size:42px;
+  font-weight:bold;
+  color:#333;
+	}
+	.result span{
+  font-size:14px;
+  font-weight:normal;
+  color:#666;
+  display:block;
+  margin-top:6px;
+	}
+
+    .metrics{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  font-size:14px;
+  }
+  .metric{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 12px;
+    background:#f7f7f7;
+    border:1px solid #ddd;
+    border-radius:10px;
+  }
+  .metric-key{
+    color:#555;
+  }
+  .metric-value{
+    font-weight:bold;
+    color:#111;
+  }
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <form id="f">
+      <div class="grid">
+        <div>
+          <label for="city">City</label>
+          <select id="city">
+            <option value="warszawa">Warsaw</option>
+            <option value="krakow">Krakow</option>
+            <option value="katowice">Katowice</option>
+            <option value="wroclaw">Wroclaw</option>
+            <option value="poznan">Poznan</option>
+            <option value="lodz">Lodz</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="rooms">Rooms</label>
+          <input id="rooms" type="number" placeholder="2" />
+        </div>
+
+        <div>
+          <label for="squareMeters">Square meters</label>
+          <input id="squareMeters" type="number" placeholder="54.5" />
+        </div>
+
+        <div>
+          <label for="centreDistance">Centre distance</label>
+          <input id="centreDistance" type="number" placeholder="3.2" />
+        </div>
+
+        <div>
+          <label for="hasParkingSpace">Has parking space</label>
+          <select id="hasParkingSpace">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="hasElevator">Has elevator</label>
+          <select id="hasElevator">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="hasSecurity">Has security</label>
+          <select id="hasSecurity">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit">Send</button>
+    </form>
+
+    <pre id="out">{}</pre>
+  </div>
+  
+  <div class="container">
+  <div class="result" id="result">
+    —
+    <span>Rent monthly price in PLN</span>
+  </div>
+	</div>
+
+  <div class="container">
+    <div class="metrics" id="metrics"></div>
+  </div>
+
+<script>
+  const API_URL = "/api/predict";
+
+  const f = document.getElementById("f");
+  const out = document.getElementById("out");
+  const result = document.getElementById("result");
+
+  f.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const data = {
+      city: city.value,
+      rooms: Number(rooms.value),
+      squareMeters: Number(squareMeters.value),
+      centreDistance: Number(centreDistance.value),
+      hasParkingSpace: hasParkingSpace.value === "true",
+      hasElevator: hasElevator.value === "true",
+      hasSecurity: hasSecurity.value === "true",
+    };
+
+
+    out.textContent = JSON.stringify(data, null, 2);
+
+
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(r => {
+  result.firstChild.textContent = Math.round(r.prediction_pln);
+  })
+  });
+
+
+  const name = "Multiple Layer Perceptron Regression";
+  const paramaters_number = 20833;
+  const df_len = 6000;
+  const r2 = 0.73128;
+  const mse = 0.00215;
+  const rmse = 0.04640;
+  const metrics = document.getElementById("metrics");
+
+  const metricsData = {
+  "Model": name,
+  "Number of learnable parameters": paramaters_number,
+  "Dataset samples amount": df_len,
+  "R squared error": r2,
+  "Mean squared error": mse,
+  "Root mean squared error": rmse
+  };
+
+  for (const key in metricsData) {
+    const row = document.createElement("div");
+    row.className = "metric";
+
+  row.innerHTML = `
+    <div class="metric-key">${key}</div>
+    <div class="metric-value">${metricsData[key]}</div>
+  `;
+
+  metrics.appendChild(row);
+}
+
+</script>
+
+</body>
+</html>

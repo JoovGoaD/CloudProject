@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/predict" class="header-btn">Price prediction</a>
+    <h2 class="header-text">
+      If you want to receive predicted price of the apartment with your parameters,
+      please navigate to "Price prediction"
+    </h2>
+  </div>
+</header>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Real Estate Poland 2023-2024</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+  <style>
+
+    .header{
+  width:100%;
+  background:#fff;
+  border-bottom:1px solid #ddd;
+  margin-bottom:30px;
+  }
+
+  .header-inner{
+    max-width:720px;
+    margin:0 auto;
+    padding:16px 20px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+
+  .header-btn{
+    padding:10px 14px;
+    border-radius:10px;
+    background:#111;
+    color:#fff;
+    text-decoration:none;
+    font-weight:bold;
+    white-space:nowrap;
+  }
+
+  .header-text{
+    margin:0;
+    font-size:14px;
+    font-weight:normal;
+    color:#333;
+  }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 30px 0;
+      font-weight: 500;
+      color: #333;
+      letter-spacing: 1px;
+    }
+
+    .dashboard {
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background-color: #ffffff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+
+    .chart {
+      width: 100%;
+      height: 360px;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .wide-chart-wrapper {
+  max-width: 1100px;
+  margin: 0 auto 40px;
+  padding: 0 20px;
+	}
+
+	.wide-card .chart {
+  height: 420px; 
+	}
+
+  </style>
+</head>
+
+<body>
+<h1>REAL ESTATE POLAND 2023–2024</h1>
+
+<div class="dashboard">
+  <div class="card"><div id="BarChartOne" class="chart"></div></div>
+  <div class="card"><div id="PieChartOne" class="chart"></div></div>
+  <div class="card"><div id="BarChartTwo" class="chart"></div></div>
+  <div class="card"><div id="PieChartTwo" class="chart"></div></div>
+</div>
+
+<div class="wide-chart-wrapper">
+  <div class="card wide-card">
+    <div id="LineChartOne" class="chart"></div>
+  </div>
+</div>
+
+
+<script>
+fetch("/api/charts/avg-price-by-rooms")
+  .then(r => r.json())
+  .then(data => {
+    Plotly.newPlot("BarChartOne", [{
+      type: "bar",
+      x: data.labels,
+      y: data.values,
+      marker: { color: "#4e79a7" }
+    }], {
+      title: "Average price by number of rooms (PLN)",
+      margin: { t: 60 }
+    });
+  });
+ 
+fetch("/api/charts/approximately-sqms")
+  .then(r => r.json())
+  .then(data => {
+    Plotly.newPlot("PieChartOne", [{
+      type: "pie",
+      labels: data.labels,
+      values: data.values,
+      hole: 0.4
+    }], {
+      title: "Square metres groups percentage",
+      margin: { t: 60 }
+    });
+  });
+
+fetch("/api/charts/avg-price-by-region")
+  .then(r => r.json())
+  .then(data => {
+    Plotly.newPlot("BarChartTwo", [{
+      type: "bar",
+      x: data.labels,
+      y: data.values,
+      marker: { color: "#59a14f" }
+    }], {
+      title: "Average price by region (PLN)",
+      margin: { t: 60 }
+    });
+  });
+
+fetch("/api/charts/parkinglot-percentage-per-region")
+  .then(r => r.json())
+  .then(data => {
+    Plotly.newPlot("PieChartTwo", [{
+      type: "pie",
+      labels: data.labels,
+      values: data.values
+    }], {
+      title: "Parking space percentage",
+      margin: { t: 60 }
+    });
+  });
+  
+fetch("/api/charts/avg-price-by-month?date_from=2023-11-01&date_to=2024-05-01")
+  .then(r => r.json())
+  .then(data => {
+    Plotly.newPlot("LineChartOne", [{
+      type: "scatter",
+      mode: "lines+markers",
+      x: data.labels,
+      y: data.values
+    }], {
+      title: "Average rent price by month (PLN) — 2023-11 to 2024-05",
+      margin: { t: 60 },
+      xaxis: { title: "Month" },
+      yaxis: { title: "Average price (PLN)" }
+    });
+  });
+</script>
+
+</body>
+</html>
